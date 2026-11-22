@@ -1,0 +1,38 @@
+========================================================================
+RAPIDO ₹40K CAPTAIN — UNIFIED ANDROID APK + EXCEL + GOOGLE SHEETS SYNC
+========================================================================
+
+WHAT THIS UNIFIED APP DOES:
+1. Installs as a native Android APK ("Rapido ₹40K Captain").
+2. Dual-Sync Engine on every "Save Shift" tap:
+   - OFFLINE LOCAL EXCEL CSV: Directly overwrites
+     `Documents/Rapido_40K_Tracker/RAPIDO_CAPTAIN_26DAY_TRACKER.csv`
+     on your phone (works 100% offline with zero duplicate files).
+   - CLOUD GOOGLE SHEETS: Simultaneously pushes the entry to your
+     Google Sheet if you link your Apps Script Web App URL.
+3. Three Quick Sync Buttons at the top of the app:
+   - `Open Excel`: Opens the local CSV directly in Excel / WPS Office.
+   - `Load Local`: Imports edits made directly in your local CSV file.
+   - `Pull Cloud`: Pulls edits made directly in your Google Sheet and
+     updates both the app and your local Excel CSV.
+
+------------------------------------------------------------------------
+PART 1: BUILD THE .APK IN THE CLOUD (3 MINUTES ON YOUR PHONE)
+------------------------------------------------------------------------
+1. Extract `Rapido_40K_Unified_Android_Project.zip`.
+2. Create a new repository on GitHub (github.com) and upload all files
+   from inside `Rapido_40K_Unified_Android_Project` (including
+   `.github/workflows/build-apk.yml`).
+3. Open the "Actions" tab -> Wait ~2 minutes for the green checkmark ✅ ->
+   Download `Rapido-40K-Unified-APK` under Artifacts -> Install `app-debug.apk`.
+
+------------------------------------------------------------------------
+PART 2: CONNECT GOOGLE SHEETS AUTO-SYNC (OPTIONAL)
+------------------------------------------------------------------------
+1. Open your tracker sheet in Google Sheets -> Extensions -> Apps Script.
+2. Paste the code from `Google_Sheets_Apps_Script.js` and save.
+3. Click Deploy -> New deployment -> Type: Web app -> Execute as: Me ->
+   Who has access: Anyone -> Copy the Web App URL (`.../exec`).
+4. Paste that URL into the top bar of your installed Android app and tap
+   "Link".
+========================================================================

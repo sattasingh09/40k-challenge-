@@ -1,0 +1,576 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>Rapido ₹40K Captain App</title>
+  <style>
+    :root {
+      --bg: #0f172a;
+      --card: #1e293b;
+      --accent: #facc15;
+      --green: #22c55e;
+      --red: #ef4444;
+      --blue: #38bdf8;
+      --text: #f8fafc;
+      --muted: #94a3b8;
+      --border: #334155;
+    }
+    * { box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; -webkit-tap-highlight-color: transparent; }
+    body { margin: 0; background: var(--bg); color: var(--text); padding: 12px 12px 76px 12px; }
+    .container { max-width: 680px; margin: 0 auto; }
+    header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
+    h1 { margin: 0; font-size: 1.22rem; color: var(--accent); }
+    .sub { color: var(--muted); font-size: 0.78rem; margin-top: 2px; }
+    .badge-days { background: #1e293b; border: 1px solid var(--accent); color: var(--accent); padding: 6px 10px; border-radius: 20px; font-weight: 800; font-size: 0.82rem; }
+    .sync-card {
+      background: #172033; border: 1px solid var(--border); border-radius: 12px;
+      padding: 12px; margin-bottom: 12px;
+    }
+    .status-badge { font-size: 0.8rem; font-weight: 700; margin-bottom: 4px; }
+    .status-linked { color: var(--green); }
+    .status-unlinked { color: var(--accent); }
+    .url-row { display: flex; gap: 6px; margin: 8px 0; }
+    .url-row input { flex: 1; padding: 9px; font-size: 0.8rem; }
+    .sync-actions { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 6px; }
+    button {
+      background: var(--accent); color: #000; border: none; padding: 10px 8px;
+      border-radius: 10px; font-weight: 700; cursor: pointer; font-size: 0.8rem;
+      display: flex; align-items: center; justify-content: center; gap: 4px;
+    }
+    button:active { transform: scale(0.98); }
+    button.secondary { background: #334155; color: var(--text); }
+    button.green { background: var(--green); color: #052e16; }
+    button.danger { background: var(--red); color: #fff; padding: 8px 12px; font-size: 0.8rem; }
+    .stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 12px; }
+    .stat-card { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 10px 12px; }
+    .stat-label { font-size: 0.72rem; color: var(--muted); text-transform: uppercase; }
+    .stat-val { font-size: 1.15rem; font-weight: 800; margin-top: 3px; }
+    .card { background: var(--card); border: 1px solid var(--border); border-radius: 14px; padding: 14px; margin-bottom: 12px; }
+    .card h2 { margin: 0 0 10px 0; font-size: 1.02rem; color: var(--accent); }
+    .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+    .full-span { grid-column: 1 / -1; }
+    label { display: block; font-size: 0.76rem; color: var(--muted); margin-bottom: 4px; font-weight: 600; }
+    input, select {
+      width: 100%; padding: 11px; border-radius: 10px; border: 1px solid var(--border);
+      background: #0f172a; color: var(--text); font-size: 1rem;
+    }
+    .live-net {
+      margin: 12px 0; padding: 11px; background: #0f172a; border: 1px solid var(--border);
+      border-radius: 10px; font-weight: 800; text-align: center; font-size: 1rem;
+    }
+    .checkpoints { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+    .cp { background: #0f172a; padding: 10px; border-radius: 10px; font-size: 0.8rem; border: 1px solid var(--border); }
+    .cp strong { display: block; color: var(--accent); font-size: 0.98rem; margin-top: 2px; }
+    .shift-item { border-left: 3px solid var(--accent); padding-left: 10px; margin-bottom: 12px; }
+    .shift-time { font-weight: 700; font-size: 0.86rem; color: var(--accent); }
+    .shift-desc { font-size: 0.82rem; color: #cbd5e1; margin-top: 3px; line-height: 1.4; }
+    table { width: 100%; border-collapse: collapse; font-size: 0.8rem; }
+    th, td { padding: 8px 6px; text-align: left; border-bottom: 1px solid var(--border); }
+    th { color: var(--muted); font-size: 0.74rem; }
+    .bottom-nav {
+      position: fixed; bottom: 0; left: 0; right: 0;
+      background: #1e293b; border-top: 1px solid var(--border);
+      display: grid; grid-template-columns: 1fr 1fr 1fr;
+      padding: 6px 8px; gap: 6px; z-index: 100;
+    }
+    .nav-btn { background: transparent; color: var(--muted); padding: 9px 4px; border-radius: 10px; font-size: 0.82rem; font-weight: 700; }
+    .nav-btn.active { background: var(--accent); color: #000; }
+    .hidden { display: none; }
+    .toast {
+      position: fixed; top: 14px; left: 50%; transform: translateX(-50%);
+      background: #22c55e; color: #052e16; padding: 10px 16px; border-radius: 20px;
+      font-weight: 800; font-size: 0.82rem; z-index: 999; box-shadow: 0 6px 20px rgba(0,0,0,0.4);
+      display: none; white-space: nowrap;
+    }
+  </style>
+</head>
+<body>
+<div id="toast" class="toast">Saved!</div>
+
+<div class="container">
+  <header>
+    <div>
+      <h1>Rapido ₹40K Captain</h1>
+      <div class="sub">2018 Pulsar 150 (40 kmpl) • Nagole</div>
+    </div>
+    <div class="badge-days" id="daysProgress">0 / 26 Days</div>
+  </header>
+
+  <!-- Dual Sync Card: Local Android Excel CSV + Google Sheets Cloud -->
+  <div class="sync-card">
+    <div id="localStatus" class="status-badge status-linked">✅ Local Excel CSV: Documents/Rapido_40K_Tracker</div>
+    <div id="cloudStatus" class="status-badge status-unlinked">☁️ Google Sheets Cloud: Optional (Paste Link Below)</div>
+    <div class="url-row">
+      <input type="url" id="webhookUrlInput" placeholder="https://script.google.com/macros/s/.../exec" />
+      <button class="green" style="width:auto; padding:0 14px;" onclick="saveWebhookUrl()">Link</button>
+    </div>
+    <div class="sync-actions">
+      <button onclick="openExcelDirectly()">📊 Open Excel</button>
+      <button class="secondary" onclick="reloadFromDeviceCSV()">📥 Load Local</button>
+      <button class="secondary" onclick="pullFromGoogleSheets()">☁️ Pull Cloud</button>
+    </div>
+  </div>
+
+  <!-- Summary Stats -->
+  <div class="stats-grid">
+    <div class="stat-card">
+      <div class="stat-label">Monthly Net Profit</div>
+      <div class="stat-val" id="statNet" style="color:var(--green);">₹0 / ₹40K</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">Total Gross</div>
+      <div class="stat-val" id="statGross">₹0</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">Petrol + Fees</div>
+      <div class="stat-val" id="statExpense">₹0</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">Avg Net / Day</div>
+      <div class="stat-val" id="statAvg">₹0</div>
+    </div>
+  </div>
+
+  <!-- TAB 1: DAILY LOG -->
+  <div id="tab-log">
+    <div class="card">
+      <h2>Log Today's Shift (Target: ₹1,540+ net)</h2>
+      <div class="form-grid">
+        <div>
+          <label>Day Number (1–26)</label>
+          <select id="dayNum" onchange="loadDayIntoForm()"></select>
+        </div>
+        <div>
+          <label>Date</label>
+          <input type="date" id="entryDate" />
+        </div>
+        <div>
+          <label>Trip Meter KM (≤190)</label>
+          <input type="number" inputmode="decimal" id="tripKm" placeholder="185" oninput="updateLiveNet()" />
+        </div>
+        <div>
+          <label>Rides (24–27)</label>
+          <input type="number" inputmode="numeric" id="ridesCount" placeholder="25" />
+        </div>
+        <div>
+          <label>Gross Earnings (₹)</label>
+          <input type="number" inputmode="decimal" id="grossAmt" placeholder="2150" oninput="updateLiveNet()" />
+        </div>
+        <div>
+          <label>Petrol Spent (₹)</label>
+          <input type="number" inputmode="decimal" id="petrolAmt" placeholder="500" oninput="updateLiveNet()" />
+        </div>
+        <div class="full-span">
+          <label>Rapido Subscription / App Fee (₹)</label>
+          <input type="number" inputmode="decimal" id="feeAmt" value="40" oninput="updateLiveNet()" />
+        </div>
+      </div>
+      <div class="live-net" id="liveNetBox">Calculated Net Profit: ₹0</div>
+      <button style="width:100%; padding:14px; font-size:0.94rem;" onclick="saveEntry()">💾 Save Shift (Local Excel + Cloud Sync)</button>
+    </div>
+
+    <div class="card">
+      <h2>Weekly Pace Checkpoints</h2>
+      <div class="checkpoints">
+        <div class="cp">Day 6 (Week 1)<strong>₹9,240</strong></div>
+        <div class="cp">Day 13 (Halfway)<strong>₹20,020</strong></div>
+        <div class="cp">Day 20 (Week 3)<strong>₹30,800</strong></div>
+        <div class="cp">Day 26 (Goal Complete)<strong>₹40,040</strong></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- TAB 2: NAGOLE PLAN -->
+  <div id="tab-plan" class="hidden">
+    <div class="card">
+      <h2>Split-Shift Timetable (11 Active Hrs)</h2>
+      <div class="shift-item">
+        <div class="shift-time">07:00 AM – 08:30 AM • Target: ₹350 (5–6 rides)</div>
+        <div class="shift-desc"><strong>Nagole Local Metro Feeder Loop:</strong> Wait at Nagole Metro, Alkapuri X Roads, Bandlaguda & Sneha Puri. Take 2–5 km drops to Nagole, Uppal & LB Nagar Metro stations.</div>
+      </div>
+      <div class="shift-item">
+        <div class="shift-time">08:30 AM – 11:30 AM • Target: ₹550 (6–7 rides)</div>
+        <div class="shift-desc"><strong>Uppal – Habsiguda – Office Corridor Push:</strong> Position at Uppal X Roads, Habsiguda & Tarnaka for 8–18 km rides toward Secunderabad, Begumpet, Ameerpet or Hitech City/Madhapur.</div>
+      </div>
+      <div class="shift-item">
+        <div class="shift-time">11:30 AM – 04:00 PM • OFF-DUTY (₹0 Fuel)</div>
+        <div class="shift-desc"><strong>Afternoon Rest & Bike Check:</strong> Go offline completely. Check Pulsar 150 tire pressure (25 PSI front / 32 PSI rear) to hold 40+ kmpl.</div>
+      </div>
+      <div class="shift-item">
+        <div class="shift-time">04:00 PM – 07:30 PM • Target: ₹650 (7–8 rides)</div>
+        <div class="shift-desc"><strong>Evening Outbound & Metro Return Rush:</strong> In West Hyd: catch long return rides from Raidurg/Mindspace toward Uppal/Secunderabad. In East Hyd: wait at Uppal, Habsiguda & LB Nagar Metro.</div>
+      </div>
+      <div class="shift-item">
+        <div class="shift-time">07:30 PM – 10:30 PM • Target: ₹550 (6–7 rides)</div>
+        <div class="shift-desc"><strong>Kothapet – Dilsukhnagar – Uppal Night Surge:</strong> Work Victoria Memorial Metro (Kothapet), Dilsukhnagar & Uppal Ring Road. Finish near Nagole by 10:30 PM.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- TAB 3: 26-DAY LEDGER -->
+  <div id="tab-sheet" class="hidden">
+    <div class="card">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+        <h2 style="margin:0;">26-Day Ledger</h2>
+        <button class="danger" onclick="resetAllDays()">Reset All</button>
+      </div>
+      <div style="overflow-x:auto;">
+        <table>
+          <thead>
+            <tr>
+              <th>Day</th>
+              <th>Date</th>
+              <th>KM/Rides</th>
+              <th>Gross</th>
+              <th>Exp</th>
+              <th>Net</th>
+              <th>Total</th>
+            </tr>
+          </thead>
+          <tbody id="ledgerBody"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Bottom Navigation -->
+<div class="bottom-nav">
+  <button class="nav-btn active" onclick="switchTab('log', this)">➕ Daily Log</button>
+  <button class="nav-btn" onclick="switchTab('plan', this)">🕒 Nagole Plan</button>
+  <button class="nav-btn" onclick="switchTab('sheet', this)">📊 26-Day Sheet</button>
+</div>
+
+<script>
+  const STORAGE_KEY = "rapido_40k_unified_v1";
+  const URL_KEY = "rapido_40k_gsheets_url";
+  let entries = JSON.parse(localStorage.getItem(STORAGE_KEY) || "{}");
+  let webhookUrl = localStorage.getItem(URL_KEY) || "";
+
+  const daySelect = document.getElementById("dayNum");
+  for (let i = 1; i <= 26; i++) {
+    const opt = document.createElement("option");
+    opt.value = i;
+    opt.textContent = `Day ${String(i).padStart(2, "0")}`;
+    daySelect.appendChild(opt);
+  }
+  document.getElementById("entryDate").valueAsDate = new Date();
+
+  if (webhookUrl) {
+    document.getElementById("webhookUrlInput").value = webhookUrl;
+    updateCloudStatus(true);
+  }
+
+  function showToast(msg) {
+    const t = document.getElementById("toast");
+    t.textContent = msg;
+    t.style.display = "block";
+    setTimeout(() => { t.style.display = "none"; }, 2800);
+  }
+
+  function updateCloudStatus(linked) {
+    const el = document.getElementById("cloudStatus");
+    if (linked) {
+      el.textContent = "☁️ Google Sheets Cloud: Connected & Auto-Syncing";
+      el.className = "status-badge status-linked";
+    } else {
+      el.textContent = "☁️ Google Sheets Cloud: Optional (Paste Link Below)";
+      el.className = "status-badge status-unlinked";
+    }
+  }
+
+  function saveWebhookUrl() {
+    const val = document.getElementById("webhookUrlInput").value.trim();
+    if (!val) {
+      webhookUrl = "";
+      localStorage.removeItem(URL_KEY);
+      updateCloudStatus(false);
+      showToast("Cloud sync unlinked");
+      return;
+    }
+    if (!val.startsWith("https://script.google.com/")) {
+      alert("Please paste a valid Google Apps Script Web App URL starting with https://script.google.com/");
+      return;
+    }
+    webhookUrl = val;
+    localStorage.setItem(URL_KEY, webhookUrl);
+    updateCloudStatus(true);
+    showToast("✅ Google Sheet Linked!");
+  }
+
+  function switchTab(tabName, btn) {
+    ["log", "plan", "sheet"].forEach(t => document.getElementById("tab-" + t).classList.add("hidden"));
+    document.getElementById("tab-" + tabName).classList.remove("hidden");
+    document.querySelectorAll(".nav-btn").forEach(b => b.classList.remove("active"));
+    btn.classList.add("active");
+    window.scrollTo(0, 0);
+  }
+
+  function updateLiveNet() {
+    const gross = Number(document.getElementById("grossAmt").value) || 0;
+    const petrol = Number(document.getElementById("petrolAmt").value) || 0;
+    const fee = Number(document.getElementById("feeAmt").value) || 0;
+    const net = gross - petrol - fee;
+    const box = document.getElementById("liveNetBox");
+    box.textContent = `Calculated Net Profit: ₹${net.toLocaleString("en-IN")}`;
+    box.style.color = net >= 1540 ? "#22c55e" : (net < 0 ? "#ef4444" : "#facc15");
+  }
+
+  function loadDayIntoForm() {
+    const d = daySelect.value;
+    const item = entries[d];
+    if (item) {
+      document.getElementById("entryDate").value = item.date || "";
+      document.getElementById("tripKm").value = item.km || "";
+      document.getElementById("ridesCount").value = item.rides || "";
+      document.getElementById("grossAmt").value = item.gross || "";
+      document.getElementById("petrolAmt").value = item.petrol || "";
+      document.getElementById("feeAmt").value = item.fee ?? 40;
+    } else {
+      document.getElementById("tripKm").value = "";
+      document.getElementById("ridesCount").value = "";
+      document.getElementById("grossAmt").value = "";
+      document.getElementById("petrolAmt").value = "";
+      document.getElementById("feeAmt").value = 40;
+    }
+    updateLiveNet();
+  }
+
+  function generateExactTemplateCSV() {
+    const rows = [
+      ['"RAPIDO CAPTAIN 26-DAY EARNINGS & FUEL TRACKER (TARGET: ₹40,000 NET)"', '', '', '', '', '', '', '', ''],
+      ['"Bike: 2018 Pulsar 150 (40 kmpl)  |  Start: Nagole  |  Daily Gross Goal: ₹2,100  |  Fuel Cap: ₹520 (≤190 km)  |  Net Target: ₹1,540+/day"', '', '', '', '', '', '', '', ''],
+      ['', '', '', '', '', '', '', '', ''],
+      ['Day', 'Date', '"Trip KM
+(≤190 km)"', '"Rides
+(24–27)"', '"Gross Earnings
+(₹)"', '"Petrol Spent
+(₹)"', '"App Fee
+(₹)"', '"Net Profit
+(₹)"', '"Running Total
+(₹)"']
+    ];
+
+    let runningTotal = 0;
+    let totalKm = 0, totalRides = 0, totalGross = 0, totalPetrol = 0, totalFee = 0, totalNet = 0;
+
+    for (let i = 1; i <= 26; i++) {
+      const label = `Day ${String(i).padStart(2, "0")}`;
+      const item = entries[i];
+      if (item) {
+        const net = item.gross - item.petrol - item.fee;
+        runningTotal += net;
+        totalKm += item.km;
+        totalRides += item.rides;
+        totalGross += item.gross;
+        totalPetrol += item.petrol;
+        totalFee += item.fee;
+        totalNet += net;
+        rows.push([label, item.date, item.km, item.rides, item.gross, item.petrol, item.fee, net, runningTotal]);
+      } else {
+        rows.push([label, '', '', '', '', '', '', '', '']);
+      }
+    }
+
+    rows.push(['TOTAL', '26 Days', totalKm || '', totalRides || '', totalGross || '', totalPetrol || '', totalFee || '', totalNet || '', runningTotal || '']);
+    rows.push(['GOAL', 'Target', 4940, 650, 54600, 13520, 1040, 40040, 40040]);
+    rows.push(['', '', '', '', '', '', '', '', '']);
+    rows.push(['"PACE CHECKPOINTS:   Day 6 = ₹9,240   |   Day 13 = ₹20,020   |   Day 20 = ₹30,800   |   Day 26 = ₹40,040+"', '', '', '', '', '', '', '', '']);
+    rows.push(['"Note: Set aside ~₹75/day (₹2,000/month) from your Net Profit for Pulsar 150 engine oil changes (every 2,500–3,000 km), chain lube & brake pads."', '', '', '', '', '', '', '', '']);
+    rows.push(['DAILY SPLIT-SHIFT SCHEDULE & NAGOLE PICKUP STRATEGY', '', '', '', '', '', '', '', '']);
+    rows.push(['', '', '', '', '', '', '', '', '']);
+    rows.push(['Time Slot', 'Shift Phase', 'Target Rides & Gross', 'Nagole & Hyderabad Hotspot Strategy', '', '', '', '', '']);
+    rows.push(['07:00 AM – 08:30 AM', 'Morning Feeder Loop', '5–6 rides | ~₹350', '"Start at Nagole Metro, Alkapuri X Roads, Bandlaguda & Sneha Puri Colony. Take short 2–5 km drops to Nagole, Uppal & LB Nagar Metro stations."', '', '', '', '', '']);
+    rows.push(['08:30 AM – 11:30 AM', 'Morning Office Rush', '6–7 rides | ~₹550', '"Position at Uppal X Roads, Habsiguda & Tarnaka for 8–18 km rides toward Secunderabad, Begumpet, Ameerpet or Hitech City/Madhapur."', '', '', '', '', '']);
+    rows.push(['11:30 AM – 04:00 PM', 'Afternoon Break (OFF)', '0 rides | ₹0 Fuel', '"Go offline completely. Rest, eat lunch, check tire pressure (25 PSI front / 32 PSI rear). Avoid empty midday cruising."', '', '', '', '', '']);
+    rows.push(['04:00 PM – 07:30 PM', 'Evening Outbound Rush', '7–8 rides | ~₹650', 'If in West Hyd: catch long return rides from Raidurg/Mindspace toward Secunderabad/Uppal. If in East Hyd: wait at Uppal/Habsiguda/LB Nagar Metro for colony drops.', '', '', '', '', '']);
+    rows.push(['07:30 PM – 10:30 PM', 'Night Commercial Surge', '6–7 rides | ~₹550', '"Work Kothapet (Victoria Memorial Metro), Dilsukhnagar, Chaitanyapuri & Uppal Ring Road. Finish near Nagole by 10:30 PM with zero dead km."', '', '', '', '', '']);
+
+    return "﻿" + rows.map(r => r.join(",")).join("
+");
+  }
+
+  function syncToAndroidDisk() {
+    const csvText = generateExactTemplateCSV();
+    if (window.AndroidExcelBridge && window.AndroidExcelBridge.saveCsvFile) {
+      return window.AndroidExcelBridge.saveCsvFile(csvText);
+    } else {
+      const blob = new Blob([csvText], { type: "text/csv;charset=utf-8;" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = "RAPIDO_CAPTAIN_26DAY_TRACKER.csv";
+      a.click();
+      URL.revokeObjectURL(url);
+      return "✅ Local CSV Downloaded";
+    }
+  }
+
+  async function pushToGoogleSheets(payload) {
+    if (!webhookUrl) return false;
+    try {
+      await fetch(webhookUrl, {
+        method: "POST",
+        mode: "no-cors",
+        headers: { "Content-Type": "text/plain;charset=utf-8" },
+        body: JSON.stringify(payload)
+      });
+      return true;
+    } catch (e) {
+      console.error(e);
+      return false;
+    }
+  }
+
+  async function pullFromGoogleSheets() {
+    if (!webhookUrl) {
+      alert("Paste and Link your Google Apps Script Web App URL first.");
+      return;
+    }
+    showToast("☁️ Pulling from Google Sheets...");
+    try {
+      const res = await fetch(webhookUrl);
+      const data = await res.json();
+      if (data && data.entries) {
+        entries = data.entries;
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(entries));
+        renderUI();
+        loadDayIntoForm();
+        syncToAndroidDisk();
+        showToast(`✅ Synced ${Object.keys(entries).length} days (Cloud + Local)!`);
+      }
+    } catch (e) {
+      alert("Could not pull from Google Sheets. Check internet connection or verify script access is 'Anyone'.");
+    }
+  }
+
+  function openExcelDirectly() {
+    syncToAndroidDisk();
+    if (window.AndroidExcelBridge && window.AndroidExcelBridge.openInExcel) {
+      window.AndroidExcelBridge.openInExcel();
+    }
+  }
+
+  function parseCSVIntoEntries(csvText) {
+    const lines = csvText.split(/?
+/);
+    let count = 0;
+    lines.forEach(line => {
+      const m = line.match(/^Day\s*0?(\d{1,2}),([^,]*),([^,]*),([^,]*),([^,]*),([^,]*),([^,]*)/i);
+      if (m) {
+        const d = Number(m[1]);
+        const dateVal = m[2].trim();
+        const kmVal = Number(m[3]) || 0;
+        const ridesVal = Number(m[4]) || 0;
+        const grossVal = Number(m[5]) || 0;
+        const petrolVal = Number(m[6]) || 0;
+        const feeVal = m[7].trim() === "" ? 40 : Number(m[7]);
+        if (dateVal || kmVal || ridesVal || grossVal || petrolVal) {
+          entries[d] = { date: dateVal, km: kmVal, rides: ridesVal, gross: grossVal, petrol: petrolVal, fee: feeVal };
+          count++;
+        }
+      }
+    });
+    return count;
+  }
+
+  function reloadFromDeviceCSV() {
+    if (window.AndroidExcelBridge && window.AndroidExcelBridge.readCsvFile) {
+      const csvText = window.AndroidExcelBridge.readCsvFile();
+      if (!csvText) {
+        showToast("⚠️ No local CSV found yet");
+        return;
+      }
+      const count = parseCSVIntoEntries(csvText);
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(entries));
+      renderUI();
+      loadDayIntoForm();
+      showToast(`📥 Loaded ${count} days from Local CSV!`);
+    }
+  }
+
+  async function saveEntry() {
+    const day = Number(daySelect.value);
+    const date = document.getElementById("entryDate").value;
+    const km = Number(document.getElementById("tripKm").value) || 0;
+    const rides = Number(document.getElementById("ridesCount").value) || 0;
+    const gross = Number(document.getElementById("grossAmt").value) || 0;
+    const petrol = Number(document.getElementById("petrolAmt").value) || 0;
+    const fee = Number(document.getElementById("feeAmt").value) || 0;
+
+    entries[day] = { date, km, rides, gross, petrol, fee };
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(entries));
+    renderUI();
+
+    const localMsg = syncToAndroidDisk();
+    if (webhookUrl) {
+      const cloudOk = await pushToGoogleSheets({ action: "upsert", day, date, km, rides, gross, petrol, fee });
+      showToast(cloudOk ? `✅ Day ${day}: Local Excel + Cloud Synced!` : localMsg);
+    } else {
+      showToast(localMsg);
+    }
+  }
+
+  async function resetAllDays() {
+    if (!confirm("Clear all 26 days from App, Local Excel CSV, and Google Sheet?")) return;
+    entries = {};
+    localStorage.removeItem(STORAGE_KEY);
+    renderUI();
+    syncToAndroidDisk();
+    if (webhookUrl) {
+      await pushToGoogleSheets({ action: "reset" });
+      showToast("🗑️ Cleared Local CSV & Cloud Sheet!");
+    } else {
+      showToast("🗑️ Cleared Local CSV!");
+    }
+  }
+
+  function renderUI() {
+    const tbody = document.getElementById("ledgerBody");
+    tbody.innerHTML = "";
+    let daysLogged = 0, totalGross = 0, totalExp = 0, running = 0;
+
+    for (let i = 1; i <= 26; i++) {
+      const item = entries[i];
+      const tr = document.createElement("tr");
+      if (item) {
+        daysLogged++;
+        const exp = item.petrol + item.fee;
+        const net = item.gross - exp;
+        totalGross += item.gross;
+        totalExp += exp;
+        running += net;
+        tr.innerHTML = `
+          <td><strong>D${String(i).padStart(2, "0")}</strong></td>
+          <td>${item.date ? item.date.slice(5) : ""}</td>
+          <td>${item.km}k/${item.rides}</td>
+          <td>₹${item.gross}</td>
+          <td>₹${exp}</td>
+          <td style="color:${net >= 1540 ? '#22c55e' : '#facc15'}; font-weight:700;">₹${net}</td>
+          <td>₹${running}</td>
+        `;
+      } else {
+        tr.innerHTML = `<td style="color:var(--muted);">D${String(i).padStart(2, "0")}</td><td colspan="6" style="color:#475569;">—</td>`;
+      }
+      tbody.appendChild(tr);
+    }
+
+    document.getElementById("daysProgress").textContent = `${daysLogged} / 26 Days`;
+    document.getElementById("statNet").textContent = `₹${running.toLocaleString("en-IN")} / ₹40K`;
+    document.getElementById("statGross").textContent = `₹${totalGross.toLocaleString("en-IN")}`;
+    document.getElementById("statExpense").textContent = `₹${totalExp.toLocaleString("en-IN")}`;
+    const avg = daysLogged > 0 ? Math.round(running / daysLogged) : 0;
+    document.getElementById("statAvg").textContent = `₹${avg.toLocaleString("en-IN")}`;
+  }
+
+  window.addEventListener("DOMContentLoaded", () => {
+    if (Object.keys(entries).length === 0) {
+      reloadFromDeviceCSV();
+    }
+    renderUI();
+    loadDayIntoForm();
+  });
+</script>
+</body>
+</html>
